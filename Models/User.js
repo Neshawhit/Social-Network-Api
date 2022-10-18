@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 // user model schema
-const user = new Schema(
+const userSchema = new Schema(
   {username: {
     type: String,
     required: true,
@@ -12,31 +12,40 @@ const user = new Schema(
     type: String,
     required: true,
     unique: true,
-    match: [, 'Must match a valid email address (look into Mongoose matching validation'],
+    match: [/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/], 
  },
- thoughts: {
+ thoughts: [{
     type: Schema.Types.ObjectId,
     ref: 'Thought',
     // Array of _id values referencing the Thought model
     // friends
- },
-friends: {
+ }],
+friends: [{
     type: Schema.Types.ObjectId,
     ref: 'User',
     // Array of _id values referencing the User model (self-reference),
-}
+}],
     
+  },{
+    toJSON: {
+      virtuals:true,
+      getters: true
+    },
+    id:false
   }
 );
+  const User = model('User', userSchema);
+
+
+  // userSchema.virtual('friendCount').get(function () {
+  //   return.this.friends.length;
+  // })
 // Create a virtual called friendCount 
-user
-  .virtual('friendCount')
-  // Getter
-  .get(function () {
-    return this.tags.length;
+userSchema.virtual('friendCount') .get(function () {
+    return this.friends.length;
   });
 
 // Initialize our User model
-const User = model('user', user);
+// const User = model('User', userSchema);
 
 module.exports = User;
